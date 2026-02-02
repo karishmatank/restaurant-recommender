@@ -10,3 +10,8 @@ models/
 
 # ignore environment variable files
 .env
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
