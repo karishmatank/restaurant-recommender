@@ -12,6 +12,29 @@ ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 CLAUDE_MODEL = "claude-haiku-4-5-20251001"  # Haiku = cheaper model
 CLAUDE_MODEL_BATCH = "claude-sonnet-4-5-20250929" # Batches = cheaper rate
 
+# Prompt for extracting dish characteristics
+DISH_EXTRACTION_PROMPT = """
+You are extracting structured dish information from restaurant reviews to power a food recommendation system.
+
+For each dish explicitly named in the review, extract:
+- dish_name: the name of the dish (correct obvious typos)
+- sentiment: positive, negative, neutral, or mixed
+- characteristics: ONLY objective, descriptive attributes of the dish itself
+
+For characteristics, restrict yourself strictly to:
+- Flavor: (e.g. spicy, sweet, salty, tangy, savory, smoky)
+- Texture: (e.g. crispy, creamy, tender, crunchy, silky)
+- Temperature: (e.g. hot, cold, warm)
+- Portion: (e.g. generous, small, shareable)
+- Preparation: (e.g. well-seasoned, undercooked, al dente)
+
+Do NOT include subjective opinions or quality judgments as characteristics (e.g. "delicious", "amazing", "worth the hype", "really good").
+Correct obvious typos in dish names (e.g., "friend fish" → "fried fish")
+
+If a review mentions general food ("the food was great") without naming specific dishes, return an empty array
+If a dish is mentioned but has no qualifying characteristics, return an empty characteristics array 
+"""
+
 # Structured output schema for dish extraction
 DISH_EXTRACTION_SCHEMA = {
     "type": "object",

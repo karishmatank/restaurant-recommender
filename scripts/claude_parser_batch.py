@@ -10,7 +10,8 @@ import time
 import pandas as pd
 from textwrap import dedent
 from anthropic import Anthropic
-from config import ANTHROPIC_API_KEY, CLAUDE_MODEL_BATCH, DISH_EXTRACTION_SCHEMA, PARSED_DATA_DIR, PARSED_REVIEWS_DIR
+from config import ANTHROPIC_API_KEY, CLAUDE_MODEL_BATCH, DISH_EXTRACTION_SCHEMA, PARSED_REVIEWS_DIR, DISH_EXTRACTION_PROMPT
+from load_reviews_utils import load_processed_reviews
 
 
 def create_review_parsing_prompt(review_text):
@@ -24,16 +25,8 @@ def create_review_parsing_prompt(review_text):
         Formatted prompt string
     """
     prompt = dedent(f"""
-        From the review below, extract: 
-        1. ALL dishes mentioned by name (e.g., "carbonara", "margherita pizza", "Caesar salad") 
-        2. For EACH dish, determine the sentiment (positive, negative, neutral, or mixed) 
-        3. For EACH dish, extract any characteristics mentioned (e.g., flavor descriptors like "spicy", "creamy", "tangy"; texture like "crispy", "tender"; portion comments like "generous", "small"; or preparation like "al dente", "well-done")
-        Guidelines: 
-        * If a review mentions general food ("the food was great") without naming specific dishes, return an empty array 
-        * If a dish is mentioned but has no descriptive characteristics, return an empty characteristics array 
-        * Correct obvious typos in dish names (e.g., "friend fish" → "fried fish")
-        * Extract characteristics as short phrases 
-        * Common characteristics include: taste (spicy, sweet, savory, bland), texture (crispy, creamy, crunchy, tender), temperature (hot, cold), freshness, portion size, presentation
+        {DISH_EXTRACTION_PROMPT}
+        
         Review: {review_text}
     """)
     
@@ -300,27 +293,6 @@ def process_reviews_batch(reviews_df, batch_size=None, start_index=0, poll_inter
     results_df = process_batch_results(results, reviews_df, start_index)
     
     return results_df
-
-
-def load_processed_reviews():
-    """
-    Load the most recent processed reviews data.
-    
-    Returns:
-        DataFrame with processed reviews
-    """
-    json_files = list(PARSED_DATA_DIR.glob("reviews_*.json"))
-    
-    if not json_files:
-        raise FileNotFoundError(f"No processed review files found in {PARSED_DATA_DIR}")
-    
-    # Get the most recent file
-    latest_file = max(json_files, key=lambda p: p.stat().st_mtime)
-    
-    print(f"Loading reviews from: {latest_file}")
-    df = pd.read_json(latest_file)
-    
-    return df
 
 
 def main():
