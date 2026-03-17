@@ -2,3 +2,4 @@ outscraper>=3.0.0
 pandas>=2.0.0
 python-dotenv>=1.0.0
 anthropic>=0.18.0
+serpapi>=0.1.5
